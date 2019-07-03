@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Extra keys, beyond filtering:
+# ctrl-alt-c => clear unread tickets & refresh tickets
+# ctrl-r     => refresh tickets
+# ctrl-q/esc => quit
+# enter      => view ticket in console
+# ctrl-o     => view ticket in browser
+
+function browse() {
+    tickets -all | 
+        fzf --preview="tickets {1}" --bind="ctrl-alt-c:execute(tickets -clear)+accept,ctrl-r:accept,enter:execute(tickets {1} | less),ctrl-o:execute(open https://readingplus.atlassian.net/browse/{1})"
+}
+
+while true; do
+    browse || break
+done
