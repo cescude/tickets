@@ -39,6 +39,13 @@ func jiraBrowseUrl(key string) string {
 	return fmt.Sprintf("%s/browse/%s", JiraRoot, key)
 }
 
+func ifempty(s, def string) string {
+	if len(s) == 0 {
+		return def
+	}
+	return s
+}
+
 func searchLink(jql, fields string, start_at int) string {
 	return fmt.Sprintf("%s/rest/api/latest/search?maxResults=100&jql=%s&fields=%s&startAt=%d",
 		JiraRoot,
@@ -233,7 +240,7 @@ func list(clearRead, showAll, refresh bool) {
 				t.NumComments,
 				t.Title,
 				t.Status,
-				strings.Split(t.Assignee, " ")[0])
+				ifempty(strings.Split(t.Assignee, " ")[0], "Unassigned"))
 		} else {
 			break
 		}
@@ -263,13 +270,14 @@ func show(key string) {
 
 	separator := "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-	fmt.Printf("%s %s\n%s\n%s\n%s, %s\n\n%s\n",
+	fmt.Printf("%s\n\n%s %s\n%s\n\n%s\n%s, %s\n\n%s\n",
+		separator,
 		issue.Key,
 		issue.Fields.Summary,
 		jiraBrowseUrl(issue.Key),
 		separator,
 		issue.Fields.Status.Name,
-		issue.Fields.Assignee.DisplayName,
+		ifempty(issue.Fields.Assignee.DisplayName, "Unassigned"),
 		strings.TrimSpace(wrap.Wrap(issue.Fields.Description, 80)))
 
 	for _, c := range issue.Fields.Comment.Comments {
