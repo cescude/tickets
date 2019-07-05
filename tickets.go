@@ -128,15 +128,15 @@ func find(ticket Ticket, tickets []Ticket) (bool, Ticket) {
 // different, keep the left side, otherwise keep the right.  Returns both lists
 // combined, with new-hash tickets at the top.
 func unifyLists(newList, oldList []Ticket) []Ticket {
-	resultLeft := make([]Ticket, 0)
-	resultRight := make([]Ticket, 0)
+	results := make([]Ticket, 0)
 
 	for _, n := range newList {
 		found, o := find(n, oldList)
 		shouldAppend := !found || n.Hash != o.Hash
 
 		if shouldAppend {
-			resultLeft = append(resultLeft, n)
+			n.New = true
+			results = append(results, n)
 		}
 	}
 
@@ -154,22 +154,15 @@ func unifyLists(newList, oldList []Ticket) []Ticket {
 				o.Assignee = n.Assignee
 			}
 
-			resultRight = append(resultRight, o)
+			if Conf.Clear {
+				o.New = false
+			}
+
+			results = append(results, o)
 		}
 	}
 
-	// fmt.Printf("%d/%d => %d/%d\n", len(newList), len(resultLeft), len(oldList), len(resultRight))
-
-	for i, _ := range resultLeft {
-		resultLeft[i].New = true
-	}
-	for i, _ := range resultRight {
-		if Conf.Clear {
-			resultRight[i].New = false
-		}
-	}
-
-	return append(resultLeft, resultRight...)
+	return results
 }
 
 func loadRecentTickets(terminalHashes map[string]bool) []Ticket {
